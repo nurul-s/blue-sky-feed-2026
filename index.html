@@ -10,37 +10,35 @@
     margin: 0;
     padding: 0;
   }
+
   #feed-container {
     max-width: 600px;
     margin: 0 auto;
     padding: 10px;
   }
+
   .feed-item {
-    background: rgba(255,255,255,0);
+    background: rgba(255, 255, 255, 0.0);
     border: none;
     padding: 12px;
     margin-bottom: 10px;
     border-radius: 6px;
   }
+
   .feed-item a {
     text-decoration: none;
     color: #1a0dab;
     font-weight: bold;
     font-size: 15px;
   }
+
   .feed-item small {
     display: block;
     color: #555;
     font-size: 12px;
     margin-top: 4px;
   }
-  iframe.video-embed {
-    width: 100%;
-    height: 315px;
-    border: none;
-    margin-top: 8px;
-    border-radius: 6px;
-  }
+
   #loading {
     text-align: center;
     color: #333;
@@ -55,19 +53,20 @@
 </div>
 
 <script>
-// RSS feeds
+// RSS feeds to combine
 const rssFeeds = [
-  "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1", // Reddit MBIP posts
-  "https://news.google.com/rss/search?q=MBIP&hl=en-MY&gl=MY&ceid=MY:en", // Google News MBIP Malaysia
-  "https://www.youtube.com/feeds/videos.xml?search_query=MBIP+Malaysia" // YouTube MBIP videos
+  "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1",
+  "https://news.google.com/rss/search?q=MBIP&hl=en-MY&gl=MY&ceid=MY:en"
 ];
 
+// Fetch a single RSS feed using rss2json
 async function fetchRSS(url) {
   const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
   const data = await res.json();
   return data.items;
 }
 
+// Fetch and display combined feed
 async function fetchCombinedFeed() {
   try {
     const allItems = [];
@@ -77,23 +76,18 @@ async function fetchCombinedFeed() {
     }
 
     // Sort by newest first
-    allItems.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
     const container = document.getElementById("feed-container");
     container.innerHTML = "";
 
-    // Add RSS items
     allItems.forEach(item => {
       const div = document.createElement("div");
       div.className = "feed-item";
-
-      let commentsLink = "";
-      if(item.link.includes("reddit.com")) commentsLink = `<a href="${item.link}" target="_blank">View Comments</a>`;
-
       div.innerHTML = `
         <a href="${item.link}" target="_blank">${item.title}</a>
         <small>${new Date(item.pubDate).toLocaleString()}</small>
-        ${commentsLink}
+        ${item.link.includes("reddit.com") ? `<a href="${item.link}" target="_blank">View Comments</a>` : ""}
       `;
       container.appendChild(div);
     });
