@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MBIP Malaysia Feed</title>
+<title>MBIP Malaysia Combined Feed</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: transparent; /* Transparent background */
+    background: transparent;
     margin: 0;
     padding: 0;
   }
@@ -18,7 +18,7 @@
   }
 
   .feed-item {
-    background: rgba(255, 255, 255, 0.0); /* Transparent feed items */
+    background: rgba(255, 255, 255, 0.0);
     border: none;
     padding: 12px;
     margin-bottom: 10px;
@@ -53,26 +53,45 @@
 </div>
 
 <script>
-// Reddit RSS feed for r/malaysia, searching for MBIP
-const rssURL = "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1";
+// RSS feeds to combine
+const rssFeeds = [
+  "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1",
+  "https://news.google.com/rss/search?q=MBIP&hl=en-MY&gl=MY&ceid=MY:en"
+];
 
-async function fetchFeed() {
+// Fetch a single RSS feed using rss2json
+async function fetchRSS(url) {
+  const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+  const data = await res.json();
+  return data.items;
+}
+
+// Fetch and display combined feed
+async function fetchCombinedFeed() {
   try {
-    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`);
-    const data = await res.json();
+    const allItems = [];
+    for (const feed of rssFeeds) {
+      const items = await fetchRSS(feed);
+      allItems.push(...items);
+    }
+
+    // Sort by newest first
+    allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
     const container = document.getElementById("feed-container");
     container.innerHTML = "";
 
-    data.items.forEach(item => {
+    allItems.forEach(item => {
       const div = document.createElement("div");
       div.className = "feed-item";
       div.innerHTML = `
         <a href="${item.link}" target="_blank">${item.title}</a>
         <small>${new Date(item.pubDate).toLocaleString()}</small>
-        <a href="${item.link}" target="_blank">View Comments</a> <!-- Link to comments -->
+        ${item.link.includes("reddit.com") ? `<a href="${item.link}" target="_blank">View Comments</a>` : ""}
       `;
       container.appendChild(div);
     });
+
   } catch (err) {
     const container = document.getElementById("feed-container");
     container.innerHTML = "<p>Unable to load feed.</p>";
@@ -81,9 +100,9 @@ async function fetchFeed() {
 }
 
 // Initial load
-fetchFeed();
+fetchCombinedFeed();
 // Refresh every 5 minutes
-setInterval(fetchFeed, 5 * 60 * 1000);
+setInterval(fetchCombinedFeed, 5 * 60 * 1000);
 </script>
 
 </body>
