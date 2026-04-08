@@ -53,8 +53,8 @@
 </div>
 
 <script>
-// Google News RSS feed limited to Malaysia
-const rssURL = "https://news.google.com/rss/search?q=MBIP&hl=en-MY&gl=MY&ceid=MY:en";
+// Reddit RSS feed for r/malaysia, searching for MBIP
+const rssURL = "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1";
 
 async function fetchFeed() {
   try {
@@ -69,6 +69,7 @@ async function fetchFeed() {
       div.innerHTML = `
         <a href="${item.link}" target="_blank">${item.title}</a>
         <small>${new Date(item.pubDate).toLocaleString()}</small>
+        <a href="${item.link}" target="_blank">View Comments</a> <!-- Link to comments -->
       `;
       container.appendChild(div);
     });
