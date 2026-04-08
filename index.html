@@ -57,15 +57,9 @@
 <script>
 // RSS feeds
 const rssFeeds = [
-  "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1",
-  "https://news.google.com/rss/search?q=MBIP&hl=en-MY&gl=MY&ceid=MY:en",
-  "https://www.youtube.com/feeds/videos.xml?search_query=MBIP+Malaysia"
-];
-
-// TikTok video embeds (manually choose video URLs)
-const tiktokEmbeds = [
-  "https://www.tiktok.com/embed/1234567890", // replace with actual TikTok video URL
-  "https://www.tiktok.com/embed/0987654321"  // add more if needed
+  "https://www.reddit.com/r/malaysia/search.rss?q=MBIP&restrict_sr=1", // Reddit MBIP posts
+  "https://news.google.com/rss/search?q=MBIP&hl=en-MY&gl=MY&ceid=MY:en", // Google News MBIP Malaysia
+  "https://www.youtube.com/feeds/videos.xml?search_query=MBIP+Malaysia" // YouTube MBIP videos
 ];
 
 async function fetchRSS(url) {
@@ -82,7 +76,7 @@ async function fetchCombinedFeed() {
       allItems.push(...items);
     }
 
-    // Sort newest first
+    // Sort by newest first
     allItems.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
 
     const container = document.getElementById("feed-container");
@@ -101,14 +95,6 @@ async function fetchCombinedFeed() {
         <small>${new Date(item.pubDate).toLocaleString()}</small>
         ${commentsLink}
       `;
-      container.appendChild(div);
-    });
-
-    // Add TikTok embeds at the bottom
-    tiktokEmbeds.forEach(url => {
-      const div = document.createElement("div");
-      div.className = "feed-item";
-      div.innerHTML = `<iframe class="video-embed" src="${url}" allowfullscreen></iframe>`;
       container.appendChild(div);
     });
 
