@@ -2,53 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MBIP Social Feed</title>
+<title>MBIP Live Feed</title>
 <style>
-body { font-family: Arial, sans-serif; background:#e6ecf0; margin:0; padding:10px; }
-h2 { text-align:center; color:#1da1f2; margin-bottom:10px; }
-#feed { max-width:600px; margin:0 auto; overflow-y:auto; max-height:600px; }
-.feed-item { background:#fff; border-radius:15px; border:1px solid #ccd6dd; padding:12px 15px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: transform 0.1s; }
-.feed-item:hover { transform: translateY(-2px); box-shadow:0 3px 6px rgba(0,0,0,0.15); }
-.feed-item a { font-weight:bold; color:#1da1f2; text-decoration:none; font-size:15px; }
-.feed-item small { display:block; color:#657786; font-size:12px; margin-top:4px; }
+  body { font-family: Arial, sans-serif; background: #f5f8fa; margin:0; padding:20px; }
+  h2 { text-align:center; color:#333; margin-bottom:20px; }
+  #feed { max-width:600px; margin:0 auto; }
+  .feed-item { background:#fff; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 1px 2px rgba(0,0,0,0.1); }
+  .feed-item a { color:#1a0dab; text-decoration:none; font-weight:bold; font-size:15px; }
+  .feed-item small { display:block; color:#555; font-size:12px; margin-top:4px; }
 </style>
 </head>
 <body>
 
-<h2>MBIP Social Feed</h2>
+<h2>MBIP Feed</h2>
 <div id="feed">Loading feed...</div>
 
 <script>
-const rssURL = "https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=MBIP&hl=en-US&gl=US&ceid=US:en";
+// Replace this with any RSS feed URL (Reddit search, Google News, etc.)
+const rssURL = "https://www.reddit.com/search.rss?q=MBIP";
 
-function addFeedItem(item){
-  const container = document.getElementById("feed");
-  const div = document.createElement("div");
-  div.className = "feed-item";
-  div.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>
-                   <small>${new Date(item.pubDate).toLocaleString()}</small>`;
-  container.insertBefore(div, container.firstChild); // newest on top
-}
+async function fetchFeed() {
+  try {
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`);
+    const data = await res.json();
+    const container = document.getElementById("feed");
+    container.innerHTML = "";
 
-function fetchFeed(){
-  fetch(rssURL)
-    .then(res=>res.json())
-    .then(data=>{
-      const container = document.getElementById("feed");
-      container.innerHTML=""; // clear old
-      data.items.forEach(addFeedItem);
-    })
-    .catch(err=>{
-      document.getElementById("feed").innerHTML="<p>Unable to load MBIP feed.</p>";
-      console.error(err);
+    data.items.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "feed-item";
+      div.innerHTML = `
+        <a href="${item.link}" target="_blank">${item.title}</a>
+        <small>${new Date(item.pubDate).toLocaleString()}</small>
+      `;
+      container.appendChild(div);
     });
+  } catch (err) {
+    document.getElementById("feed").innerHTML = "<p>Unable to load feed.</p>";
+    console.error(err);
+  }
 }
 
-// initial load
+// Load feed on page load
 fetchFeed();
-
-// refresh every 5 minutes
-setInterval(fetchFeed,5*60*1000);
+// Refresh every 5 minutes
+setInterval(fetchFeed, 5 * 60 * 1000);
 </script>
 
 </body>
